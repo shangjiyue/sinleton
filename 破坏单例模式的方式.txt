@@ -1,0 +1,27 @@
+破坏单例的方式：
+1、通过反射破坏
+    破坏方式：
+        通过反射获取无参构造器
+        //很无聊的情况下，进行破坏
+        Class<?> clazz = LazyInnerClassSingleton.class;
+        //通过反射拿到私有的构造方法
+        Constructor c = clazz.getDeclaredConstructor(null);
+        //强制访问私有
+        c.setAccessible(true);
+        //通过反射强制初始化
+        Object o1 = c.newInstance();
+    解决方式：
+        在构造器中进行判断
+        private LazyInnerClassSingleton(){
+            if(LazyHolder.LAZY != null){
+                throw new RuntimeException("不允许创建多个实例");
+            }
+        }
+
+
+2、序列化、反序列化破坏
+    破坏方式：
+        在反序列话的时候会重新new一个对象，破坏单例。
+    解决方式：
+        readResolve方法，反序列话过程中，会自行判断是否存在该方法，如果存在则会调用该方法，
+        覆盖之前已经new出来的对象。
